@@ -1,4 +1,4 @@
-#' Aggregate M1 Data Files
+#' Aggregate M1 Data Files for a Calibration
 #'
 #' The purpose of this function is to aggregate all the individual ring files
 #' into a single csv file. The function requires a chip layout file that
@@ -6,6 +6,8 @@
 #'
 #' @param fsrThresh a numerical value specifying the minimum difference
 #' between two time points to be considered an FSF shift
+#' @param getLayoutFile a logical value specifying if the layout file should be
+#' downloaded from Github; if you made your own layout file, leave as FALSE
 #' @inheritParams analyzeBiosensorData
 #'
 #' @return The function outputs a single csv file in the `loc` directory and is
@@ -13,9 +15,10 @@
 #' name. If the main directory has is names "20171112_gaskTestData_MRR",
 #' then the output file will be named "TestData_allRings.csv".
 
-aggData <- function(loc = "plots", getLayoutFile = FALSE,
-                    filename = "groupNames_allClusters.csv",
-                    fsr = FALSE, fsrThresh = 5980) {
+
+aggCalData <- function(loc = "plots", getLayoutFile = FALSE,
+                       filename = "groupNames_allClusters.csv",
+                       fsr = FALSE, fsrThresh = 3000) {
         # get information of chip layout from github repository
         if (getLayoutFile){
                 git <- "https://raw.githubusercontent.com/"
@@ -37,12 +40,14 @@ aggData <- function(loc = "plots", getLayoutFile = FALSE,
 
         # add data to data frame corresponding for each ring in rings
         df <- lapply(rings, function(i){
+                print(i)
                 dat <- read.csv(i, header = FALSE)
                 ringNum <- as.numeric(strsplit(i, "\\.")[[1]][1])
                 recipeCol <- which(recipe$Ring == ringNum)
                 tmp <- dat[,c(1,2)] # time and shift from raw data
                 tmp$ring <- ringNum
                 tmp$group <- recipe$Group[recipeCol]
+                tmp$conc <- recipe$Concentration[recipeCol]
                 tmp$groupName <- as.character(recipe$Target[[recipeCol]])
                 tmp$channel <- recipe$Channel[[recipeCol]]
                 tmp$run <- name
@@ -68,8 +73,8 @@ aggData <- function(loc = "plots", getLayoutFile = FALSE,
         df <- dplyr::bind_rows(df)
 
         # renames columns in df
-        names(df) <- c("Time", "Shift", "Ring", "Group", "Target", "Channel",
-                       "Experiment", "TimePoint")
+        names(df) <- c("Time", "Shift", "Ring", "Group", "Concentration",
+                       "Target", "Channel", "Experiment", "TimePoint")
 
         # creates "plots" directory
         dir.create(loc, showWarnings = FALSE)

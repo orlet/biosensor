@@ -30,28 +30,26 @@
 #' @examples
 #' dir <- system.file("extdata", "20171112_gaskTestData_MRR", package = "biosensor")
 #' setwd(dir)
-#' analyzeMRRData(time1 = 51, time2 = 39,
+#' analyzeBiosensorData(time1 = 51, time2 = 39,
 #'                filename = "groupNames_XPP.csv",
 #'                loc = "plots", fsr = FALSE,
 #'                chkRings = FALSE, plotData = FALSE, celebrate = FALSE)
-#' \donttest{analyzeMRRData(time1 = 51, time2 = 39,
+#' \donttest{analyzeBiosensorData(time1 = 51, time2 = 39,
 #'                          filename = "groupNames_XPP.csv",
 #'                          loc = "plots", fsr = TRUE,
 #'                          chkRings = TRUE, plotData = TRUE,
 #'                          celebrate = FALSE)}
-#'
-#' @export
-#'
 
-analyzeMRRData <- function(time1 = 51, time2 = 39,
-                        filename = "groupNames_XPP.csv",
+
+analyzeBiosensorCalData <- function(time1 = 52, time2 = 41,
+                        filename = "groupNames_allClusters.csv",
                         loc = "plots",
-                        fsr = FALSE,
+                        fsr = TRUE,
                         chkRings = FALSE,
                         plotData = TRUE,
-                        celebrate = TRUE) {
+                        celebrate = FALSE) {
         getName()
-        aggDat <- aggData(filename = filename, loc = loc, fsr = fsr)
+        aggDat <- aggCalData(filename = filename, loc = loc, fsr = fsr)
         subDat_ch1 <- subtractControl(data = aggDat,
                                       ch = 1,
                                       cntl = "thermal",
@@ -65,12 +63,12 @@ analyzeMRRData <- function(time1 = 51, time2 = 39,
                                       cntl = "thermal",
                                       loc = loc)
 
-        netDat_ch1 <- getNetShifts(data = subDat_ch1,
+        netDat_ch1 <- getCalNetShifts(data = subDat_ch1,
                                    time1 = time1,
                                    time2 = time2,
                                    step = 1,
                                    loc = loc)
-        netDat_ch2 <- getNetShifts(data = subDat_ch2,
+        netDat_ch2 <- getCalNetShifts(data = subDat_ch2,
                                    time1 = time1,
                                    time2 = time2,
                                    step = 1,
@@ -98,10 +96,10 @@ analyzeMRRData <- function(time1 = 51, time2 = 39,
         }
 
         if (chkRings){
-                bestRings <- checkRingQuality(data = aggData,
-                                              chkTime1 = 20,
-                                              chkTime2 = 30,
-                                              loc = loc)}
+                checkRingQuality(data = aggData,
+                                 chkTime1 = 20,
+                                 chkTime2 = 30,
+                                 loc = loc)}
 
         if (celebrate){shell.exec("https://youtu.be/dQw4w9WgXcQ")}
 }
